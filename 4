@@ -1,0 +1,84 @@
+using System;
+using System.Collections.Generic;
+
+public static class SlidingWindow
+{
+    public static int MaxSumSubarray(int[] arr, int k)
+    {
+        if (arr == null || arr.Length < k)
+            return 0;
+
+        int maxSum = 0;
+        int windowSum = 0;
+
+        for (int i = 0; i < k; i++)
+        {
+            windowSum += arr[i];
+        }
+        maxSum = windowSum;
+
+        for (int i = k; i < arr.Length; i++)
+        {
+            windowSum += arr[i] - arr[i - k];
+            maxSum = Math.Max(maxSum, windowSum);
+        }
+
+        return maxSum;
+    }
+
+    public static int LongestSubstringWithoutRepeating(string s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return 0;
+
+        var charSet = new HashSet<char>();
+        int left = 0, maxLength = 0;
+
+        for (int right = 0; right < s.Length; right++)
+        {
+            while (charSet.Contains(s[right]))
+            {
+                charSet.Remove(s[left]);
+                left++;
+            }
+
+            charSet.Add(s[right]);
+            maxLength = Math.Max(maxLength, right - left + 1);
+        }
+
+        return maxLength;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        int[] arr1 = { 2, 1, 5, 1, 3, 2 };
+        int k1 = 3;
+        int maxSum1 = SlidingWindow.MaxSumSubarray(arr1, k1);
+        Console.WriteLine($"Массив: [{string.Join(", ", arr1)}]");
+        Console.WriteLine($"Максимальная сумма подмассива размера {k1}: {maxSum1}");
+
+        int[] arr2 = { 1, 4, 2, 10, 2, 3, 1, 0, 20 };
+        int k2 = 4;
+        int maxSum2 = SlidingWindow.MaxSumSubarray(arr2, k2);
+        Console.WriteLine($"\nМассив: [{string.Join(", ", arr2)}]");
+        Console.WriteLine($"Максимальная сумма подмассива размера {k2}: {maxSum2}");
+
+        string s1 = "abcabcbb";
+        int result1 = SlidingWindow.LongestSubstringWithoutRepeating(s1);
+        Console.WriteLine($"\nСтрока: '{s1}'");
+        Console.WriteLine($"Длина самой длинной подстроки без повторений: {result1}");
+
+        string s2 = "bbbbb";
+        int result2 = SlidingWindow.LongestSubstringWithoutRepeating(s2);
+        Console.WriteLine($"\nСтрока: '{s2}'");
+        Console.WriteLine($"Длина самой длинной подстроки без повторений: {result2}");
+
+        string s3 = "pwwkew";
+        int result3 = SlidingWindow.LongestSubstringWithoutRepeating(s3);
+        Console.WriteLine($"\nСтрока: '{s3}'");
+        Console.WriteLine($"Длина самой длинной подстроки без повторений: {result3}");
+    }
+}
