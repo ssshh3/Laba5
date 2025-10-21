@@ -1,0 +1,115 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Graph
+{
+    private Dictionary<string, Dictionary<string, int>> adjacencyList;
+
+    public Graph()
+    {
+        adjacencyList = new Dictionary<string, Dictionary<string, int>>();
+    }
+
+    public void AddVertex(string vertex)
+    {
+        if (!adjacencyList.ContainsKey(vertex))
+            adjacencyList[vertex] = new Dictionary<string, int>();
+    }
+
+    public void AddEdge(string vertex1, string vertex2, int weight = 1)
+    {
+        AddVertex(vertex1);
+        AddVertex(vertex2);
+
+        adjacencyList[vertex1][vertex2] = weight;
+        adjacencyList[vertex2][vertex1] = weight;
+    }
+
+    public List<string> GetVertices()
+    {
+        return adjacencyList.Keys.ToList();
+    }
+
+    public Dictionary<string, int> GetNeighbors(string vertex)
+    {
+        return adjacencyList.ContainsKey(vertex) ?
+            adjacencyList[vertex] : new Dictionary<string, int>();
+    }
+}
+
+public static class DijkstraAlgorithm
+{
+    public static Dictionary<string, int> Dijkstra(Graph graph, string startVertex)
+    {
+        var distances = new Dictionary<string, int>();
+        var visited = new HashSet<string>();
+
+        foreach (var vertex in graph.GetVertices())
+        {
+            distances[vertex] = int.MaxValue;
+        }
+        distances[startVertex] = 0;
+
+        var priorityQueue = new SortedSet<(int distance, string vertex)>(
+            Comparer<(int distance, string vertex)>.Create((x, y) =>
+                x.distance != y.distance ? x.distance.CompareTo(y.distance) : x.vertex.CompareTo(y.vertex)));
+
+        priorityQueue.Add((0, startVertex));
+
+        while (priorityQueue.Count > 0)
+        {
+            var (currentDistance, currentVertex) = priorityQueue.Min;
+            priorityQueue.Remove(priorityQueue.Min);
+
+            if (visited.Contains(currentVertex))
+                continue;
+
+            visited.Add(currentVertex);
+
+            foreach (var (neighbor, weight) in graph.GetNeighbors(currentVertex))
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    var newDistance = currentDistance + weight;
+                    if (newDistance < distances[neighbor])
+                    {
+                        distances[neighbor] = newDistance;
+                        priorityQueue.Add((newDistance, neighbor));
+                    }
+                }
+            }
+        }
+
+        return distances;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var weightedGraph = new Graph();
+        weightedGraph.AddEdge("A", "B", 4);
+        weightedGraph.AddEdge("A", "C", 2);
+        weightedGraph.AddEdge("B", "C", 1);
+        weightedGraph.AddEdge("B", "D", 5);
+        weightedGraph.AddEdge("C", "D", 8);
+        weightedGraph.AddEdge("C", "E", 10);
+        weightedGraph.AddEdge("D", "E", 2);
+
+        Console.WriteLine("Кратчайшие расстояния из A:");
+        var distancesFromA = DijkstraAlgorithm.Dijkstra(weightedGraph, "A");
+        foreach (var (vertex, distance) in distancesFromA)
+        {
+            Console.WriteLine($"A → {vertex}: {distance}");
+        }
+
+        Console.WriteLine("\nКратчайшие расстояния из C:");
+        var distancesFromC = DijkstraAlgorithm.Dijkstra(weightedGraph, "C");
+        foreach (var (vertex, distance) in distancesFromC)
+        {
+            Console.WriteLine($"C → {vertex}: {distance}");
+        }
+    }
+}
