@@ -1,0 +1,129 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Graph
+{
+    private Dictionary<string, Dictionary<string, int>> adjacencyList;
+
+    public Graph()
+    {
+        adjacencyList = new Dictionary<string, Dictionary<string, int>>();
+    }
+
+    public void AddVertex(string vertex)
+    {
+        if (!adjacencyList.ContainsKey(vertex))
+            adjacencyList[vertex] = new Dictionary<string, int>();
+    }
+
+    public void AddEdge(string vertex1, string vertex2, int weight = 1)
+    {
+        AddVertex(vertex1);
+        AddVertex(vertex2);
+
+        adjacencyList[vertex1][vertex2] = weight;
+        adjacencyList[vertex2][vertex1] = weight;
+    }
+
+    public List<string> GetVertices()
+    {
+        return adjacencyList.Keys.ToList();
+    }
+
+    public Dictionary<string, int> GetNeighbors(string vertex)
+    {
+        return adjacencyList.ContainsKey(vertex) ?
+            adjacencyList[vertex] : new Dictionary<string, int>();
+    }
+}
+
+public static class GraphTraversal
+{
+    public static List<string> BFS(Graph graph, string startVertex)
+    {
+        var result = new List<string>();
+        var visited = new HashSet<string>();
+        var queue = new Queue<string>();
+
+        visited.Add(startVertex);
+        queue.Enqueue(startVertex);
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            result.Add(current);
+
+            foreach (var neighbor in graph.GetNeighbors(current))
+            {
+                if (!visited.Contains(neighbor.Key))
+                {
+                    visited.Add(neighbor.Key);
+                    queue.Enqueue(neighbor.Key);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static List<string> DFS(Graph graph, string startVertex)
+    {
+        var result = new List<string>();
+        var visited = new HashSet<string>();
+        var stack = new Stack<string>();
+
+        stack.Push(startVertex);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+
+            if (!visited.Contains(current))
+            {
+                visited.Add(current);
+                result.Add(current);
+
+                foreach (var neighbor in graph.GetNeighbors(current).Reverse())
+                {
+                    if (!visited.Contains(neighbor.Key))
+                    {
+                        stack.Push(neighbor.Key);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var graph = new Graph();
+        graph.AddVertex("A");
+        graph.AddVertex("B");
+        graph.AddVertex("C");
+        graph.AddVertex("D");
+        graph.AddVertex("E");
+
+        graph.AddEdge("A", "B");
+        graph.AddEdge("A", "C");
+        graph.AddEdge("B", "D");
+        graph.AddEdge("C", "E");
+        graph.AddEdge("D", "E");
+
+        Console.WriteLine("Вершины графа: " + string.Join(", ", graph.GetVertices()));
+        Console.WriteLine("Соседи A: " + string.Join(", ", graph.GetNeighbors("A").Keys));
+
+        Console.WriteLine("\nОбход в ширину (BFS)");
+        Console.WriteLine("BFS из A: " + string.Join(" → ", GraphTraversal.BFS(graph, "A")));
+        Console.WriteLine("BFS из C: " + string.Join(" → ", GraphTraversal.BFS(graph, "C")));
+
+        Console.WriteLine("\nОбход в глубину (DFS)");
+        Console.WriteLine("DFS из A: " + string.Join(" → ", GraphTraversal.DFS(graph, "A")));
+        Console.WriteLine("DFS из B: " + string.Join(" → ", GraphTraversal.DFS(graph, "B")));
+    }
+}
