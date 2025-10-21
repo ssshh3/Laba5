@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Interval
+{
+    public int Start { get; set; }
+    public int End { get; set; }
+
+    public Interval(int start, int end)
+    {
+        Start = start;
+        End = end;
+    }
+}
+
+public static class GreedyAlgorithms
+{
+    public static List<Interval> ActivitySelection(List<Interval> intervals)
+    {
+        if (intervals == null || intervals.Count == 0)
+            return new List<Interval>();
+
+        var sortedIntervals = intervals.OrderBy(i => i.End).ToList();
+
+        var selected = new List<Interval>();
+        selected.Add(sortedIntervals[0]);
+
+        int lastEnd = sortedIntervals[0].End;
+
+        for (int i = 1; i < sortedIntervals.Count; i++)
+        {
+            if (sortedIntervals[i].Start >= lastEnd)
+            {
+                selected.Add(sortedIntervals[i]);
+                lastEnd = sortedIntervals[i].End;
+            }
+        }
+
+        return selected;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var intervals = new List<Interval>
+        {
+            new Interval(1, 4),
+            new Interval(3, 5),
+            new Interval(0, 6),
+            new Interval(5, 7),
+            new Interval(3, 9),
+            new Interval(5, 9),
+            new Interval(6, 10),
+            new Interval(8, 11),
+            new Interval(8, 12),
+            new Interval(2, 14),
+            new Interval(12, 16)
+        };
+
+        Console.WriteLine("Все интервалы:");
+        foreach (var interval in intervals)
+        {
+            Console.WriteLine($"[{interval.Start}, {interval.End}]");
+        }
+
+        var selectedActivities = GreedyAlgorithms.ActivitySelection(intervals);
+
+        Console.WriteLine("\nВыбранные непересекающиеся интервалы:");
+        foreach (var activity in selectedActivities)
+        {
+            Console.WriteLine($"[{activity.Start}, {activity.End}]");
+        }
+
+        Console.WriteLine($"\nМаксимальное количество непересекающихся интервалов: {selectedActivities.Count}");
+    }
+}
